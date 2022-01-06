@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -265,6 +266,7 @@ func (c *HelmClient) install(ctx context.Context, spec *ChartSpec) (*release.Rel
 		if err := action.CheckDependencies(helmChart, req); err != nil {
 			if client.DependencyUpdate {
 				man := &downloader.Manager{
+					Out:              io.Discard,
 					ChartPath:        chartPath,
 					Keyring:          client.ChartPathOptions.Keyring,
 					SkipUpdate:       false,
@@ -434,6 +436,7 @@ func (c *HelmClient) TemplateChart(spec *ChartSpec) ([]byte, error) {
 		if err := action.CheckDependencies(helmChart, req); err != nil {
 			if client.DependencyUpdate {
 				man := &downloader.Manager{
+					Out:              io.Discard,
 					ChartPath:        chartPath,
 					Keyring:          client.ChartPathOptions.Keyring,
 					SkipUpdate:       false,
