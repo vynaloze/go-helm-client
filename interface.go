@@ -26,4 +26,5 @@ type Client interface {
 	LintChart(spec *ChartSpec) error
 	SetDebugLog(debugLog action.DebugLog)
 	ListReleaseHistory(name string, max int) ([]*release.Release, error)
+	UpdateDependencies(spec *ChartSpec) error
 }

@@ -510,6 +510,34 @@ func (c *HelmClient) ListReleaseHistory(name string, max int) ([]*release.Releas
 	return client.Run(name)
 }
 
+func (c *HelmClient) UpdateDependencies(spec *ChartSpec) error {
+	client := action.NewInstall(c.ActionConfig)
+	mergeInstallOptions(spec, client)
+
+	if client.Version == "" {
+		client.Version = ">0.0.0-0"
+	}
+
+	_, chartPath, err := c.getChart(spec.ChartName, &client.ChartPathOptions)
+	if err != nil {
+		return err
+	}
+
+	man := &downloader.Manager{
+		Out:              io.Discard,
+		ChartPath:        chartPath,
+		Keyring:          client.ChartPathOptions.Keyring,
+		SkipUpdate:       false,
+		Getters:          c.Providers,
+		RepositoryConfig: c.Settings.RepositoryConfig,
+		RepositoryCache:  c.Settings.RepositoryCache,
+	}
+	if err := man.Update(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // upgradeCRDs upgrades the CRDs of the provided chart.
 func (c *HelmClient) upgradeCRDs(ctx context.Context, chartInstance *chart.Chart) error {
 	cfg, err := c.ActionConfig.RESTClientGetter.ToRESTConfig()
